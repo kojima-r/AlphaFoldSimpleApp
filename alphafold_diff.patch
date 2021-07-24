@@ -1,0 +1,104 @@
+diff --git a/alphafold/data/tools/hhblits.py b/alphafold/data/tools/hhblits.py
+index e0aa098..18bbb81 100644
+--- a/alphafold/data/tools/hhblits.py
++++ b/alphafold/data/tools/hhblits.py
+@@ -35,7 +35,7 @@ class HHBlits:
+                *,
+                binary_path: str,
+                databases: Sequence[str],
+-               n_cpu: int = 4,
++               n_cpu: int = 16,
+                n_iter: int = 3,
+                e_value: float = 0.001,
+                maxseq: int = 1_000_000,
+diff --git a/alphafold/data/tools/jackhmmer.py b/alphafold/data/tools/jackhmmer.py
+index ae53df9..1d3401a 100644
+--- a/alphafold/data/tools/jackhmmer.py
++++ b/alphafold/data/tools/jackhmmer.py
+@@ -31,7 +31,7 @@ class Jackhmmer:
+                *,
+                binary_path: str,
+                database_path: str,
+-               n_cpu: int = 8,
++               n_cpu: int = 16,
+                n_iter: int = 1,
+                e_value: float = 0.0001,
+                z_value: Optional[int] = None,
+diff --git a/docker/Dockerfile b/docker/Dockerfile
+index 46b9668..d42d641 100644
+--- a/docker/Dockerfile
++++ b/docker/Dockerfile
+@@ -12,7 +12,7 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
+-ARG CUDA=11.0
++ARG CUDA=11.1
+ FROM nvidia/cuda:${CUDA}-base
+ # FROM directive resets ARGS, so we specify again (the value is retained if
+ # previously set).
+@@ -29,6 +29,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+       hmmer \
+       kalign \
+       tzdata \
++      software-properties-common \
+       wget \
+     && rm -rf /var/lib/apt/lists/*
+ 
+@@ -47,12 +48,24 @@ RUN wget -q -P /tmp \
+     && bash /tmp/Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda \
+     && rm /tmp/Miniconda3-latest-Linux-x86_64.sh
+ 
++ARG OS=ubuntu2004
++RUN wget https://developer.download.nvidia.com/compute/cuda/repos/${OS}/x86_64/cuda-${OS}.pin
++RUN mv cuda-${OS}.pin /etc/apt/preferences.d/cuda-repository-pin-600
++RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/${OS}/x86_64/7fa2af80.pub
++RUN add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/${OS}/x86_64/ /"
++RUN apt-get update
++RUN apt-get install libcudnn8
++RUN apt-get install libcudnn8-dev
++RUN apt-get install libcusolver-11-1
++RUN apt-get install libcusolver-dev-11-1
++
++
+ # Install conda packages.
+ ENV PATH="/opt/conda/bin:$PATH"
+ RUN conda update -qy conda \
+     && conda install -y -c conda-forge \
+       openmm=7.5.1 \
+-      cudatoolkit==${CUDA}.3 \
++      cudatoolkit==11.1.1 \
+       pdbfixer \
+       pip
+ 
+@@ -67,8 +80,8 @@ RUN pip3 install --upgrade pip \
+       https://storage.googleapis.com/jax-releases/jax_releases.html
+ 
+ # Apply OpenMM patch.
+-WORKDIR /opt/conda/lib/python3.8/site-packages
+-RUN patch -p0 < /app/alphafold/docker/openmm.patch
++WORKDIR /opt/conda/lib/python3.9/site-packages
++RUN patch --verbose -p 0 < /app/alphafold/docker/openmm.patch
+ 
+ # We need to run `ldconfig` first to ensure GPUs are visible, due to some quirk
+ # with Debian. See https://github.com/NVIDIA/nvidia-docker/issues/1399 for
+diff --git a/docker/run_docker.py b/docker/run_docker.py
+index 06cb505..d0183a1 100644
+--- a/docker/run_docker.py
++++ b/docker/run_docker.py
+@@ -28,13 +28,13 @@ from docker import types
+ #### USER CONFIGURATION ####
+ 
+ # Set to target of scripts/download_all_databases.sh
+-DOWNLOAD_DIR = 'SET ME'
++DOWNLOAD_DIR = '/data1/AlphaFold/data2/af_database'
+ 
+ # Name of the AlphaFold Docker image.
+ docker_image_name = 'alphafold'
+ 
+ # Path to a directory that will store the results.
+-output_dir = '/tmp/alphafold'
++output_dir = '/data1/AlphaFold/api/static/result'
+ 
+ # Names of models to use.
+ model_names = [
