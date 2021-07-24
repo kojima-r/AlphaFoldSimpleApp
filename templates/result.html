@@ -1,0 +1,129 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Predicted PDBs</h2>
+<hr>
+<a href="../">Task list</a>
+<br>
+<br>
+{{ task['uid'] }}<br>
+<p>
+{{ task['command'] }}
+</p>
+<p>{{ task['date'] }}</p>
+<p><a href="../static/log/{{task['uid']}}.txt">log file</a></p>
+<p><a href="../static/data/{{task['uid']}}.fasta">fasta</a></p>
+
+<table class="table table-striped">
+    <tbody>
+        <tr>
+		<td><a href="../static/result/{{task['uid']}}/ranked_0.pdb">ranked_0.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/ranked_1.pdb">ranked_1.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/ranked_2.pdb">ranked_2.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/ranked_3.pdb">ranked_3.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/ranked_4.pdb">ranked_4.pdb</td>
+	<tr>
+	</tr>
+	  <td><div class="pdbview" id="ranked_0"></div></td>
+	  <td><div class="pdbview" id="ranked_1"></div></td>
+	  <td><div class="pdbview" id="ranked_2"></div></td>
+	  <td><div class="pdbview" id="ranked_3"></div></td>
+	  <td><div class="pdbview" id="ranked_4"></div></td>
+	</tr>
+	
+	<tr>
+		<td><a href="../static/result/{{task['uid']}}/relaxed_model_1.pdb">relaxed_model_1.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/relaxed_model_2.pdb">relaxed_model_2.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/relaxed_model_3.pdb">relaxed_model_3.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/relaxed_model_4.pdb">relaxed_model_4.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/relaxed_model_5.pdb">relaxed_model_5.pdb</td>
+	<tr>
+	</tr>
+	  <td><div class="pdbview" id="relaxed_1"></div></td>
+	  <td><div class="pdbview" id="relaxed_2"></div></td>
+	  <td><div class="pdbview" id="relaxed_3"></div></td>
+	  <td><div class="pdbview" id="relaxed_4"></div></td>
+	  <td><div class="pdbview" id="relaxed_5"></div></td>
+	</tr>
+	
+	<tr>
+		<td><a href="../static/result/{{task['uid']}}/unrelaxed_model_1.pdb">unrelaxed_model_1.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/unrelaxed_model_2.pdb">unrelaxed_model_2.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/unrelaxed_model_3.pdb">unrelaxed_model_3.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/unrelaxed_model_4.pdb">unrelaxed_model_4.pdb</td>
+		<td><a href="../static/result/{{task['uid']}}/unrelaxed_model_5.pdb">unrelaxed_model_5.pdb</td>
+	<tr>
+	</tr>
+	  <td><div class="pdbview" id="unrelaxed_1"></div></td>
+	  <td><div class="pdbview" id="unrelaxed_2"></div></td>
+	  <td><div class="pdbview" id="unrelaxed_3"></div></td>
+	  <td><div class="pdbview" id="unrelaxed_4"></div></td>
+	  <td><div class="pdbview" id="unrelaxed_5"></div></td>
+	</tr>
+
+    <tbody>
+</table>
+
+
+</div>
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="https://www.ebi.ac.uk/pdbe/pdb-component-library/css/pdbe-molstar-1.1.0.css">
+
+<!-- For Light Theme include this css file instead of the above -->
+<!--<link rel="stylesheet" type="text/css" href="https://www.ebi.ac.uk/pdbe/pdb-component-library/css/pdbe-molstar-light-1.1.0.css">-->
+<!--
+Tip: Set `bgColor` option to white ({r:255,g:255,b:255}) for light theme
+-->
+<!-- JS -->
+<script type="text/javascript" src="https://www.ebi.ac.uk/pdbe/pdb-component-library/js/pdbe-molstar-plugin-1.1.0.js"></script>
+<script>
+    function create_pdb(pdb_url,target){
+      var viewerInstance = new PDBeMolstarPlugin();
+      var options = {
+        customData:{ url: pdb_url, format: "pdb"},
+        hideControls: true
+      }
+      var viewerContainer = document.getElementById(target);
+      viewerInstance.render(viewerContainer, options);
+    }
+    create_pdb("/static/result/{{task['uid']}}/ranked_0.pdb","ranked_0");
+    create_pdb("/static/result/{{task['uid']}}/ranked_1.pdb","ranked_1");
+    create_pdb("/static/result/{{task['uid']}}/ranked_2.pdb","ranked_2");
+    create_pdb("/static/result/{{task['uid']}}/ranked_3.pdb","ranked_3");
+    create_pdb("/static/result/{{task['uid']}}/ranked_4.pdb","ranked_4");
+    create_pdb("/static/result/{{task['uid']}}/relaxed_model_1.pdb","relaxed_1");
+    create_pdb("/static/result/{{task['uid']}}/relaxed_model_2.pdb","relaxed_2");
+    create_pdb("/static/result/{{task['uid']}}/relaxed_model_3.pdb","relaxed_3");
+    create_pdb("/static/result/{{task['uid']}}/relaxed_model_4.pdb","relaxed_4");
+    create_pdb("/static/result/{{task['uid']}}/relaxed_model_5.pdb","relaxed_5");
+    create_pdb("/static/result/{{task['uid']}}/unrelaxed_model_1.pdb","unrelaxed_1");
+    create_pdb("/static/result/{{task['uid']}}/unrelaxed_model_2.pdb","unrelaxed_2");
+    create_pdb("/static/result/{{task['uid']}}/unrelaxed_model_3.pdb","unrelaxed_3");
+    create_pdb("/static/result/{{task['uid']}}/unrelaxed_model_4.pdb","unrelaxed_4");
+    create_pdb("/static/result/{{task['uid']}}/unrelaxed_model_5.pdb","unrelaxed_5");
+</script>
+<style>
+      .controlsSection {
+        width: 200px;
+        float: left;
+        padding: 40px 0 0 0;
+        margin-right: 30px;
+      }
+      .controlBox {
+        border: 1px solid lightgray;
+        padding: 10px;
+        margin-bottom: 20px;
+      }
+      .pdbview{
+        width:300px;
+        height: 300px;
+        position:relative;
+      }
+      #myViewer{
+        float:left;
+        width:300px;
+        height: 300px;
+        position:relative;
+      }
+</style>
+
+{% endblock %}

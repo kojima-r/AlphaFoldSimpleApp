@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block content %}
+      <div class=container>
+      <h2>Submission</h2>
+      <hr>
+	<form method="post" id="form" action="./run?" target="_blank">
+	  <!--
+	  <div class="form-group">
+	    <label for="exampleFormControlInput1">Email address</label>
+	    <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+	  </div>
+	  <div class="form-group">
+	    <label for="exampleFormControlSelect1">Example select</label>
+	    <select class="form-control" id="">
+	      <option>1</option>
+	      <option>2</option>
+	      <option>3</option>
+	      <option>4</option>
+	      <option>5</option>
+	    </select>
+	  </div>
+	  -->
+	  <div class="form-group">
+	    <label for="q">Fasta</label>
+	    <textarea class="form-control" id="q" name="q" rows="3"></textarea>
+	  </div>
+	  <button type="submit" class="btn btn-primary">Submit</button>
+	</form>
+	</div>
+	<div class="container">
+<br>
+<h2>Task list</h2>
+<hr>
+
+<br>
+<table class="table table-striped">
+    <thead class="table-dark">
+    <tr>
+        <th>#</th>
+        <th>ID</th>
+        <th>command</th>
+        <th>process</th>
+        <th>result</th>
+        <th>deadline</th>
+        <th>submission date</th>
+        <th>終了</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for t in task %}
+      {% if t['done'] %}
+        <tr>
+          <td>{{ t['id'] }}</td>
+	  <td><a href="./result/{{t['uid']}}/">{{ t['uid'] }}</td>
+          <td>{{ t['command'] }}</td>
+          <td>{{ t['pid'] }}</td>
+          <td>{{ t['result'] }}</td>
+          <td>{{ t['deadline'] }}</td>
+          <td>{{ t['date'] }}</td>
+          <td>
+            <div class="text-success">済</div>
+          </td>
+      	</tr>
+      {% else %}
+        <tr class="table-danger">
+          <td>{{ t['id'] }}</td>
+          <td>{{ t['uid'] }}</td>
+          <td>{{ t['command'] }}</td>
+          <td>{{ t['pid'] }}</td>
+          <td>{{ t['result'] }}</td>
+          <td>{{ t['deadline'] }}</td>
+          <td>{{ t['date'] }}</td>
+          <td>
+            <div class="text-danger">未</div>
+          </td>
+      	</tr>
+      {% endif %}
+    {% endfor %}
+    </tbody>
+</table>
+	</div>
+
+{% endblock %}
