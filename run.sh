@@ -9,5 +9,5 @@ python docker/run_docker.py \
 	--fasta_paths=${path} \
 	--max_template_date=2020-05-14 \
 	--preset=casp14 \
-	--gpu_devices "2,3" >>  ${base}/log/${uid}.txt
+	--gpu_devices "2,3" >>  ${base}/log/${uid}.txt 2>&1
 

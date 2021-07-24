@@ -56,7 +56,7 @@ LOG_DIR ="/data1/AlphaFold/api/static/log"
 procs={}
 
 @app.get("/")
-def read_root(request: Request):
+async def read_root(request: Request):
     task = db.session.query(Task).filter(Task.valid == True).all()
     db.session.close()
     pid_list=[proc.pid for proc in psutil.process_iter()]
@@ -84,16 +84,17 @@ async def read_run(request: Request):
     uid=calculate_key(fileName)
     ###
     path=os.path.join(DATA_DIR, uid+".fasta")
+    N=40
     with open(path,"w") as fp:
         fp.write(">")
         fp.write(uid)
         fp.write("\n")
         lq=q.upper()
-        n_line=len(lq)//20
+        n_line=len(lq)//N
         for i in range(n_line):
-            fp.write(q[i*20:(i+1)*20])
+            fp.write(q[i*N:(i+1)*N])
             fp.write("\n")
-        fp.write(q[n_line*20:])
+        fp.write(q[n_line*N:])
         fp.write("\n")
     ###
     cmd='sh run.sh '+path+" "+uid
@@ -108,6 +109,7 @@ async def read_run(request: Request):
     )
     db.session.add(task)
     db.session.commit()
+    db.session.close()
     ###
     return {"q": q}
 
@@ -115,6 +117,7 @@ async def read_run(request: Request):
 @app.get("/result/{task_uid}")
 def read_item(task_uid: str,request: Request):
     task = db.session.query(Task).filter(Task.uid == task_uid).filter(Task.valid == True).all()
+    db.session.close()
     #return {"task_id": task_uid, "q": str(task[0])}
     #
     return templates.TemplateResponse('result.html',
