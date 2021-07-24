@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
+<h1><a href="./">AlphaFoldApp</a></h2>
       <div class=container>
       <h2>Submission</h2>
       <hr>
-	<form method="post" id="form" action="./run?" target="_blank">
+	<form method="post" id="form" action="./run" target="_self">
 	  <!--
 	  <div class="form-group">
 	    <label for="exampleFormControlInput1">Email address</label>
@@ -21,8 +22,12 @@
 	  </div>
 	  -->
 	  <div class="form-group">
+	    <p>Name<br>
+	    <input name="name" type="text" size="64"></p>
 	    <label for="q">Fasta</label>
 	    <textarea class="form-control" id="q" name="q" rows="3"></textarea>
+	    <p>API Key<br>
+	    <input name="key" type="password"></p>
 	  </div>
 	  <button type="submit" class="btn btn-primary">Submit</button>
 	</form>
@@ -37,6 +42,7 @@
     <thead class="table-dark">
     <tr>
         <th>#</th>
+        <th>name</th>
         <th>ID</th>
         <th>command</th>
         <th>process</th>
@@ -51,6 +57,7 @@
       {% if t['done'] %}
         <tr>
           <td>{{ t['id'] }}</td>
+	  <td><a href="./result/{{t['uid']}}/">{{ t['name'] }}</td>
 	  <td><a href="./result/{{t['uid']}}/">{{ t['uid'] }}</td>
           <td>{{ t['command'] }}</td>
           <td>{{ t['pid'] }}</td>
@@ -64,6 +71,7 @@
       {% else %}
         <tr class="table-danger">
           <td>{{ t['id'] }}</td>
+          <td>{{ t['name'] }}</td>
           <td>{{ t['uid'] }}</td>
           <td>{{ t['command'] }}</td>
           <td>{{ t['pid'] }}</td>

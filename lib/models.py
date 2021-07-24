@@ -32,6 +32,7 @@ class Task(Base):
 
     uid = Column('uid', String(64))
     pid = Column('pid', INTEGER())
+    name = Column('name', String(256))
     command = Column('command', String(256))
     result  = Column('result', String(1024))
     deadline = Column(
@@ -50,8 +51,9 @@ class Task(Base):
     done = Column('done', BOOLEAN, default=False, nullable=False)
     valid = Column('valid', BOOLEAN, default=True, nullable=False)
 
-    def __init__(self, uid: str, pid: str, command: str, deadline: datetime, date: datetime = datetime.now()):
+    def __init__(self, name: str, uid: str, pid: str, command: str, deadline: datetime, date: datetime = datetime.now()):
         self.uid =uid 
+        self.name=name
         self.pid =pid 
         self.command = command
         self.deadline = deadline

@@ -24,6 +24,7 @@ if __name__ == "__main__":
         if r not in uid_list:
             print(r)
             task = Task(
+                name=r,
                 uid=r,
                 pid=0,
                 command="",

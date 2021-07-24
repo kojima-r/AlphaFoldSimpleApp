@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Request, APIRouter
+from fastapi import FastAPI, Request, APIRouter, status
 from fastapi.responses import HTMLResponse
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -54,6 +55,7 @@ class RunOption(BaseModel):
 DATA_DIR="/data1/AlphaFold/api/static/data"
 LOG_DIR ="/data1/AlphaFold/api/static/log"
 procs={}
+valid_key_set=set(["bmdi"])
 
 @app.get("/")
 async def read_root(request: Request):
@@ -73,46 +75,62 @@ async def read_root(request: Request):
 async def read_run(request: Request):
     data = await request.form()
     q = data.get('q')
-    ##
-    q_list=[]
-    for line in q.split("\n"):
-        if len(line)>0 and line[0]!=">":
-            q_list.append(line.strip())
-    q="".join(q_list)
-    ##
-    fileName="file"
-    uid=calculate_key(fileName)
-    ###
-    path=os.path.join(DATA_DIR, uid+".fasta")
-    N=40
-    with open(path,"w") as fp:
-        fp.write(">")
-        fp.write(uid)
-        fp.write("\n")
-        lq=q.upper()
-        n_line=len(lq)//N
-        for i in range(n_line):
-            fp.write(q[i*N:(i+1)*N])
+    key=data.get('key')
+    name=data.get('name')
+    if key in valid_key_set:
+        ##
+        q_list=[]
+        for line in q.split("\n"):
+            if len(line)>0 and line[0]!=">":
+                q_list.append(line.strip())
+        q="".join(q_list)
+        ##
+        fileName="file"
+        uid=calculate_key(fileName)
+        ###
+        path=os.path.join(DATA_DIR, uid+".fasta")
+        N=40
+        with open(path,"w") as fp:
+            fp.write(">")
+            fp.write(uid)
             fp.write("\n")
-        fp.write(q[n_line*N:])
-        fp.write("\n")
-    ###
-    cmd='sh run.sh '+path+" "+uid
-    proc = subprocess.Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, text=True)
-    pid=proc.pid
-    ###
-    task = Task(
-        uid=uid,
-        pid=str(pid),
-        command=cmd,
-        deadline=datetime.datetime.now()+datetime.timedelta(days=1)
-    )
-    db.session.add(task)
-    db.session.commit()
+            lq=q.upper()
+            n_line=len(lq)//N
+            for i in range(n_line):
+                fp.write(q[i*N:(i+1)*N])
+                fp.write("\n")
+            fp.write(q[n_line*N:])
+            fp.write("\n")
+        ###
+        cmd='sh run.sh '+path+" "+uid
+        proc = subprocess.Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, text=True)
+        pid=proc.pid
+        ###
+        task = Task(
+            name=name,
+            uid=uid,
+            pid=str(pid),
+            command=cmd,
+            deadline=datetime.datetime.now()+datetime.timedelta(days=1)
+        )
+        db.session.add(task)
+        db.session.commit()
+        ###
+    return RedirectResponse("./", status_code=status.HTTP_303_SEE_OTHER)
+"""
+    task = db.session.query(Task).filter(Task.valid == True).all()
     db.session.close()
-    ###
-    return {"q": q}
-
+    pid_list=[proc.pid for proc in psutil.process_iter()]
+    pid_list=set(pid_list)
+    for t in task:
+        if int(t.pid) in pid_list:
+            t.done=False
+        else:
+            t.done=True
+    return templates.TemplateResponse('tasks.html',
+                                      {'request': request,
+                                       'task': task})
+"""
 
 @app.get("/result/{task_uid}")
 def read_item(task_uid: str,request: Request):
